@@ -1213,6 +1213,19 @@ def find_all_histories_with_first_prompts(state):
             continue
 
         data = json.loads(file_content)
+
+        # Get the model folder name from the metadata to display it next to the chat name
+        model_name = ""
+        model_folder = ""
+        metadata = data.get("metadata", {})
+        assistant_keys = [k for k in metadata if k.startswith("assistant_")]
+        if assistant_keys:
+            last_assistant = sorted(assistant_keys, key=lambda x: int(x.split("_")[1]))[-1]
+            model_name = metadata[last_assistant].get("model_name", "")
+            parts = model_name.split("\\")
+            if len(parts) >= 2:
+                model_folder = parts[1]
+
         if re.match(r'^[0-9]{8}-[0-9]{2}-[0-9]{2}-[0-9]{2}$', filename):
             first_prompt = ""
             if data and 'visible' in data and len(data['visible']) > 0:
@@ -1232,9 +1245,17 @@ def find_all_histories_with_first_prompts(state):
 
         # Truncate the first prompt if it's longer than 30 characters
         if len(first_prompt) > 30:
-            first_prompt = first_prompt[:30 - 3] + '...'
+            first_prompt = first_prompt[:27] + '...'
 
-        result.append((first_prompt, filename))
+        # Add model folder name to the display_name
+        if model_name and model_folder:
+            display_name = (
+                f"{first_prompt}\n[{model_folder}]"
+            )
+        else:
+            display_name = first_prompt
+
+        result.append((display_name, filename))
 
     return result
 
