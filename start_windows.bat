@@ -1,6 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
+@rem Set your private models folder path here. Leave it empty to use the default 'user_data/models'.
+@rem Example: set "MODEL_DIR_PATH=C:\MyPrivateModels"
+
 @rem environment isolation
 set PYTHONNOUSERSITE=1
 set PYTHONPATH=

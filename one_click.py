@@ -473,7 +473,15 @@ def install_extensions_requirements():
 
 
 def launch_webui():
-    run_cmd(f"python server.py {flags}", environment=True)
+    # Check if a custom model directory is set via environment variable
+    custom_model_dir = os.environ.get('MODEL_DIR_PATH', '').strip()
+    
+    # If custom model directory is set and --model-dir is not already in flags, add it
+    if custom_model_dir and '--model-dir' not in flags:
+        model_dir_flag = f' --model-dir "{custom_model_dir}"'
+        run_cmd(f"python server.py{model_dir_flag} {flags}", environment=True)
+    else:
+        run_cmd(f"python server.py {flags}", environment=True)
 
 
 if __name__ == "__main__":
@@ -527,10 +535,14 @@ if __name__ == "__main__":
             sys.exit()
 
         # Check if a model has been downloaded yet
+        custom_model_dir = os.environ.get('MODEL_DIR_PATH', '').strip()
+        
         if '--model-dir' in flags:
             # Splits on ' ' or '=' while maintaining spaces within quotes
             flags_list = re.split(' +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)|=', flags)
             model_dir = [flags_list[(flags_list.index(flag) + 1)] for flag in flags_list if flag == '--model-dir'][0].strip('"\'')
+        elif custom_model_dir:
+            model_dir = custom_model_dir
         else:
             model_dir = 'user_data/models'
 
